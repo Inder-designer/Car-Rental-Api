@@ -53,12 +53,11 @@ export const addProduct = async (req: Request, res: Response, next: NextFunction
     }
 
     // Step 2: Handle variants (optional)
+    const attrValue = !variants?.length ? attributes?.[0]?.values?.[0] : variants.attributes?.[0]?.values?.[0] || "default";
     let finalVariants = [];
     if (variants && variants.length > 0) {
         finalVariants = variants.map((variant: any) => {
             console.log(attributes);
-
-            const attrValue = variant.length ? attributes?.[0]?.values?.[0] : variant.attributes?.[0]?.values?.[0] || "default";
             return {
                 ...variant,
                 sku: variant.sku || generateSKU(name, attrValue)
@@ -66,7 +65,7 @@ export const addProduct = async (req: Request, res: Response, next: NextFunction
         });
     }
 
-    const productSku = sku || generateSKU(slug);
+    const productSku = sku || generateSKU(name, attrValue);
 
     // Step 3: If no variants, use main product fields
     const product = new Product({

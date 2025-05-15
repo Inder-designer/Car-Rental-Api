@@ -84,7 +84,6 @@ const productSchema = new mongoose.Schema<IProduct>(
         ],
         sku: {
             type: String,
-            unique: true,
         },
         variants: [VariantSchema],
         isActive: Boolean
