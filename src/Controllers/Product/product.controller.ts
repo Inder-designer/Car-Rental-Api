@@ -97,31 +97,53 @@ export const addProduct = async (req: Request, res: Response, next: NextFunction
 
 // update product details
 export const updateProduct = async (req: Request, res: Response, next: NextFunction) => {
-    const { name, description, images, brand, tags, price, discount, Stock, orderLimit, attributes, sku, variants } = req.body;
+    const {
+        name,
+        description,
+        images,
+        brand,
+        tags,
+        price,
+        discount,
+        Stock,
+        orderLimit,
+        attributes,
+        sku,
+        variants,
+        isActive,
+    } = req.body;
 
     const productId = req.params.id;
 
-    let product = await Product.findById(productId);
+    const product = await Product.findById(productId);
     if (!product) {
         return next(new ErrorHandler("Product not found", 404));
     }
 
-    const attrValue = !variants?.length ? attributes?.[0]?.values?.[0] : variants.attributes?.[0]?.values?.[0] || "default";
-    let finalVariants = [];
+    // Step 1: Handle variants if present
+    let variantIds: any[] = [];
+
     if (variants && variants.length > 0) {
-        finalVariants = variants.map((variant: any) => {
-            console.log(attributes);
-            return {
-                ...variant,
-                sku: variant.sku || generateSKU(name || product.name, attrValue)
-            };
-        });
+        for (const variantData of variants) {
+            const attrValue = variantData.attributes?.[0]?.values?.[0] || "default";
+            const variantSku = variantData.sku || generateSKU(name || product.name, attrValue);
+
+            const newVariant = new Variant({
+                ...variantData,
+                sku: variantSku,
+            });
+
+            await newVariant.save();
+            variantIds.push(newVariant._id);
+        }
     }
 
+    const attrValue = attributes?.[0]?.values?.[0] || "default";
     const productSku = sku || generateSKU(name || product.name, attrValue);
 
-    // Step 3: If no variants, use main product fields
+    // Step 2: Update product fields
     product.name = name || product.name;
+    product.slug = slugify(product.name, { lower: true, strict: true }); // Optional: keep slug updated
     product.description = description || product.description;
     product.images = images || product.images;
     product.brand = brand || product.brand;
@@ -131,20 +153,21 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
     product.Stock = variants?.length ? 0 : Stock || product.Stock;
     product.orderLimit = orderLimit || product.orderLimit;
     product.attributes = attributes || product.attributes;
-    product.sku = variants?.length ? "" : sku || productSku;
-    product.variants = finalVariants.length > 0 ? finalVariants : undefined;
+    product.sku = variants?.length ? "" : productSku;
+    product.variants = variantIds.length > 0 ? variantIds : product.variants;
+    product.isActive = typeof isActive === "boolean" ? isActive : product.isActive;
 
     await product.save();
 
-    ResponseHandler.send(res, "Product updated successfully", product, 200)
-}
+    ResponseHandler.send(res, "Product updated successfully", product, 200);
+};
+
 
 // Get Product Details
-
 export const getProduct = async (req: Request, res: Response, next: NextFunction) => {
 
     const productId = req.params.id;
-    let product = await Product.findById(productId);
+    let product = await Product.findById(productId).populate("variants");
     if (!product) {
         return next(new ErrorHandler("Product not found", 404));
     }
@@ -153,7 +176,7 @@ export const getProduct = async (req: Request, res: Response, next: NextFunction
 
 // Get all products
 export const getAllProduct = async (req: Request, res: Response, next: NextFunction) => {
-    const products = await Product.find();
+    const products = await Product.find().populate("variants");
     ResponseHandler.send(res, "All products", products, 200)
 }
 

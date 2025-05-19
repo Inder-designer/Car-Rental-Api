@@ -5,7 +5,7 @@ import { IUser } from '../../models/User/User';
 import Wishlist from '../../models/User/Wishlist';
 import Product from '../../models/Product/Product';
 import Cart from '../../models/User/Cart';
-import Variant from '../../models/Product/Variant';
+import Variant, { IVariantSchema } from '../../models/Product/Variant';
 
 export const getProfile = (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
@@ -65,66 +65,66 @@ export const getWishlist = async (req: Request, res: Response, next: NextFunctio
     ResponseHandler.send(res, "Wishlist fetched successfully", wishlist);
 }
 
-// export const addToCart = async (req: Request, res: Response, next: NextFunction) => {
-//     const user = req.user as IUser;
-//     const { productId, variantId, quantity } = req.body;
+export const addToCart = async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user as IUser;
+    const { productId, variantId, quantity } = req.body;
 
-//     if (!productId || !quantity) {
-//         return next(new ErrorHandler("Product ID and quantity are required", 400));
-//     }
+    if (!productId || !quantity) {
+        return next(new ErrorHandler("Product ID and quantity are required", 400));
+    }
 
-//     const product = await Product.findById(productId);
-//     if (!product) {
-//         return next(new ErrorHandler("Product not found", 404));
-//     }
+    const product = await Product.findById(productId);
+    if (!product) {
+        return next(new ErrorHandler("Product not found", 404));
+    }
 
-//     let price = product.price;
-//     let orderLimit = product.orderLimit;
+    let price = product.price;
+    let orderLimit = product.orderLimit;
 
-//     if (variantId) {
-//         const variant = Variant.find((v) => v._id.toString() === variantId);
-//         if (!variant) {
-//             return next(new ErrorHandler("Variant not found", 404));
-//         }
-//         price = variant.price;
-//         orderLimit = variant.orderLimit;
-//     }
+    if (variantId) {
+        const variant = await Variant.findById(variantId);
+        if (!variant) {
+            return next(new ErrorHandler("Variant not found", 404));
+        }
+        price = variant.price;
+        orderLimit = variant.orderLimit;
+    }
 
-//     let cart = await Cart.findOne({ user: user._id });
+    let cart = await Cart.findOne({ user: user._id });
 
-//     if (!cart) {
-//         cart = new Cart({ user: user._id, items: [] });
-//     }
+    if (!cart) {
+        cart = new Cart({ user: user._id, items: [] });
+    }
 
-//     const existingItem = cart.items.find(
-//         (item) =>
-//             item.product.toString() === productId &&
-//             (!variantId || item.variant?.toString() === variantId)
-//     );
+    const existingItem = cart.items.find(
+        (item) =>
+            item.product.toString() === productId &&
+            (!variantId || item.variant?.toString() === variantId)
+    );
 
-//     if (existingItem) {
-//         const totalQuantity = existingItem.quantity + quantity;
-//         if (totalQuantity > orderLimit) {
-//             return next(new ErrorHandler(`We're sorry! Only ${orderLimit} unit(s) allowed in each order`, 400));
-//         }
-//         existingItem.quantity = totalQuantity;
-//     } else {
-//         if (quantity > orderLimit) {
-//             return next(new ErrorHandler(`We're sorry! Only ${orderLimit} unit(s) allowed in each order`, 400));
-//         }
+    if (existingItem) {
+        const totalQuantity = existingItem.quantity + quantity;
+        if (totalQuantity > orderLimit) {
+            return next(new ErrorHandler(`We're sorry! Only ${orderLimit} unit(s) allowed in each order`, 400));
+        }
+        existingItem.quantity = totalQuantity;
+    } else {
+        if (quantity > orderLimit) {
+            return next(new ErrorHandler(`We're sorry! Only ${orderLimit} unit(s) allowed in each order`, 400));
+        }
 
-//         cart.items.push({
-//             product: productId,
-//             variant: variantId,
-//             quantity,
-//             price,
-//         });
-//     }
+        cart.items.push({
+            product: productId,
+            variant: variantId,
+            quantity,
+            price,
+        });
+    }
 
-//     await cart.save();
+    await cart.save();
 
-//     ResponseHandler.send(res, "Product added to cart", cart, 200);
-// };
+    ResponseHandler.send(res, "Product added to cart", cart, 200);
+};
 
 // export const removeFromCart = async (req: Request, res: Response, next: NextFunction) => {
 //   const user = req.user as IUser;

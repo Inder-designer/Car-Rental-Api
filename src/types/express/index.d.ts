@@ -6,9 +6,11 @@ declare global {
     namespace Express {
         interface User extends IUser { }
         interface Product extends IProduct { }
+        interface Variant extends IVariantSchema { }
         interface Request {
             user?: IUser;
             product?: IProduct;
+            variant?: IVariantSchema;
         }
     }
 }
