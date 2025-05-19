@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import VariantSchema from "./VariantSchema";
 
 export interface IProduct {
     name: string;
@@ -21,7 +20,7 @@ export interface IProduct {
         values: string[];
     }[];
     sku: string;
-    variants: typeof VariantSchema[];
+    variants: mongoose.Types.ObjectId[];
     isActive?: boolean;
 }
 
@@ -85,7 +84,12 @@ const productSchema = new mongoose.Schema<IProduct>(
         sku: {
             type: String,
         },
-        variants: [VariantSchema],
+        variants: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Variant",
+            }
+        ],
         isActive: Boolean
     },
     { timestamps: true }

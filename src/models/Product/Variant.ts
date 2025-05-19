@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 export interface IVariantSchema {
+    _id: mongoose.Types.ObjectId;
     sku: string;
     price: number;
     discount: number;
@@ -64,4 +65,4 @@ const VariantSchema = new mongoose.Schema<IVariantSchema>(
     { timestamps: true }
 );
 
-export default VariantSchema;
+export default mongoose.model<IVariantSchema>("Variant", VariantSchema);
