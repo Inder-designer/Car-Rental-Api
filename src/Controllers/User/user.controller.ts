@@ -80,6 +80,8 @@ export const addToCart = async (req: Request, res: Response, next: NextFunction)
 
     let price = product.price;
     let orderLimit = product.orderLimit;
+    console.log(orderLimit);
+
 
     if (variantId) {
         const variant = await Variant.findById(variantId);
@@ -101,6 +103,8 @@ export const addToCart = async (req: Request, res: Response, next: NextFunction)
             item.product.toString() === productId &&
             (!variantId || item.variant?.toString() === variantId)
     );
+    console.log(existingItem);
+
 
     if (existingItem) {
         const totalQuantity = existingItem.quantity + quantity;
@@ -126,19 +130,72 @@ export const addToCart = async (req: Request, res: Response, next: NextFunction)
     ResponseHandler.send(res, "Product added to cart", cart, 200);
 };
 
-// export const removeFromCart = async (req: Request, res: Response, next: NextFunction) => {
-//   const user = req.user as IUser;
-//   const { productId, variantId } = req.body;
+export const removeFromCart = async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user as IUser;
+    const { productId, variantId } = req.body;
 
-//   const cart = await Cart.findOne({ user: user._id });
-//   if (!cart) return next(new ErrorHandler("Cart not found", 404));
+    const cart = await Cart.findOne({ user: user._id });
+    if (!cart) return next(new ErrorHandler("Cart not found", 404));
 
-//   cart.items = cart.items.filter(
-//     (item) =>
-//       !(item.product.toString() === productId &&
-//         (!variantId || item.variant?.toString() === variantId))
-//   );
+    const itemIndex = cart.items.findIndex(
+        (item) =>
+            item.product.toString() === productId &&
+            (!variantId || item.variant?.toString() === variantId)
+    );
 
-//   await cart.save();
-//   ResponseHandler.send(res, "Item removed from cart", cart, 200);
-// };
+    if (itemIndex === -1) {
+        return next(new ErrorHandler("Item not found in cart", 404));
+    }
+
+    cart.items.splice(itemIndex, 1);
+    await cart.save();
+
+    ResponseHandler.send(res, "Item removed from cart", cart, 200);
+};
+
+// Update cart item quantity
+export const updateCartItem = async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user as IUser;
+    const { productId, variantId, quantity } = req.body;
+
+    if (!productId || !quantity) {
+        return next(new ErrorHandler("Product ID and quantity are required", 400));
+    }
+
+    const cart = await Cart.findOne({ user: user._id });
+    if (!cart) return next(new ErrorHandler("Cart not found", 404));
+
+    const item = cart.items.find(
+        (item) =>
+            item.product.toString() === productId &&
+            (!variantId || item.variant?.toString() === variantId)
+    );
+
+    if (!item) {
+        return next(new ErrorHandler("Item not found in cart", 404));
+    }
+
+    item.quantity = quantity;
+    await cart.save();
+
+    ResponseHandler.send(res, "Cart item updated successfully", cart, 200);
+}
+
+export const getCart = async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user as IUser;
+
+    if (!user) {
+        return next(new ErrorHandler("User not authenticated", 401));
+    }
+
+    const cart = await Cart.findOne({ user: user._id })
+        .populate({ path: "items.product", select: 'name description images price orderLimit discount' })
+        .populate({ path: "items.variant", select: 'images price orderLimit discount' })
+        .lean();
+    const cartItems = cart?.items.length
+    if (!cart) {
+        return next(new ErrorHandler("Cart not found", 404));
+    }
+
+    ResponseHandler.send(res, "Cart fetched successfully", { ...cart, cartItems });
+}

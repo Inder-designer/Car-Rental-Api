@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { addWishlist, getProfile, getWishlist, removeWishlist } from '../../Controllers/User/user.controller';
+import { addToCart, addWishlist, getCart, getProfile, getWishlist, removeFromCart, removeWishlist, updateCartItem } from '../../Controllers/User/user.controller';
 const router = Router();
 
 router.get('/', getProfile);
@@ -11,8 +11,9 @@ router.route('/wishlist/:id')
     .delete(removeWishlist)
 
 // Cart
-router.get('/cart', getWishlist);
-router.route('/cart/:id')
-    .put(addWishlist)
-    .delete(removeWishlist)
+router.route('/cart')
+    .get(getCart)
+    .put(addToCart)
+    .patch(updateCartItem)
+    .delete(removeFromCart)
 export default router;
