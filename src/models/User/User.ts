@@ -47,7 +47,6 @@ const UserSchema = new mongoose.Schema<IUser>(
         },
         number: {
             type: String,
-            unique: true,
             message: "Please enter a valid number",
         },
         avatar: {

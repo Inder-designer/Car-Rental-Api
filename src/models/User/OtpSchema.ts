@@ -36,7 +36,9 @@ const OTPSchema = new Schema<IOTPSchema, IOTPModel>(
 OTPSchema.statics.generateOTP = async function (
   userId: mongoose.Types.ObjectId
 ): Promise<IOTPSchema> {
-  const otp = Math.floor(1000 + Math.random() * 9000);
+  const otp = Math.floor(100000 + Math.random() * 900000);
+  console.log(otp);
+  
 
   const otpDocument = await this.findOneAndUpdate(
     { userId },

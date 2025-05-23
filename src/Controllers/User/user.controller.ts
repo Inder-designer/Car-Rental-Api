@@ -5,7 +5,7 @@ import { IUser } from '../../models/User/User';
 import Wishlist from '../../models/User/Wishlist';
 import Product from '../../models/Product/Product';
 import Cart from '../../models/User/Cart';
-import Variant, { IVariantSchema } from '../../models/Product/Variant';
+import Variant from '../../models/Product/Variant';
 
 export const getProfile = (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;

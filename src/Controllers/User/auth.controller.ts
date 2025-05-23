@@ -9,7 +9,7 @@ import passport, { session } from 'passport';
 import { IUser } from '../../models/User/User';
 
 export const signup = catchAsyncErrors(async (req: Request, res: Response, next: NextFunction) => {
-    const { name, email, number, password } = req.body;
+    const { name, email, password } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -19,7 +19,6 @@ export const signup = catchAsyncErrors(async (req: Request, res: Response, next:
     const user = await User.create({
         name,
         email,
-        number,
         password,
     });
 
@@ -68,8 +67,7 @@ export const forgotPassword = catchAsyncErrors(async (req: Request, res: Respons
     }
     const userId = user?._id;
     const otp = await OTP.generateOTP(userId!);
-    console.log("OTP:", otp);
-    return ResponseHandler.send(res, "OTP sent successfully", null, 200)
+    return ResponseHandler.send(res, `OTP sent successfully ${otp.code}`, null, 200)
 })
 
 export const verifyOTP = catchAsyncErrors(async (req, res, next) => {
@@ -99,9 +97,9 @@ export const verifyOTP = catchAsyncErrors(async (req, res, next) => {
 });
 
 export const resetPassword = catchAsyncErrors(async (req, res, next) => {
-    const { resetToken, newPassword } = req.body;
+    const { resetToken, password } = req.body;
 
-    if (!resetToken || !newPassword) {
+    if (!resetToken || !password) {
         return next(
             new ErrorHandler("Reset token and new password are required", 400)
         );
@@ -110,7 +108,7 @@ export const resetPassword = catchAsyncErrors(async (req, res, next) => {
     if (!user) {
         return next(new ErrorHandler("Invalid or expired reset token", 400));
     }
-    user.password = newPassword;
+    user.password = password;
     await user.save();
 
     return ResponseHandler.send(res, "Password reset successful", {}, 200);
