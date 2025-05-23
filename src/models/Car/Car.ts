@@ -70,18 +70,18 @@ const carListingSchema = new mongoose.Schema<ICar>(
             city: String,
             availableFrom: Date,
             availableTo: Date,
-            available: { type: Boolean, default: true },
+            available: Boolean,
 
             // Pricing & Charges
             price: Number,
-            priceUnit: { type: String, enum: ['per_hour', 'per_day', 'per_week'], default: 'per_day' },
-            deposit: { type: Number, default: 0 },
-            lateFee: { type: Number, default: 0 },
+            priceUnit: { type: String, enum: ['per_hour', 'per_day', 'per_week'] },
+            deposit: Number,
+            lateFee: Number,
         },
 
         saleDetails: {
             price: Number,
-            isSold: { type: Boolean, default: false },
+            isSold: Boolean,
             condition: { type: String, enum: ['new', 'used'] },
             owner: Number,
         },
