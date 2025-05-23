@@ -37,11 +37,7 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
             if (err) return next(err);
             return res.status(200).json({
                 message: "Logged in successfully",
-                user: {
-                    id: user._id,
-                    name: user.name,
-                    email: user.email,
-                },
+                user,
             });
         });
     })(req, res, next);
