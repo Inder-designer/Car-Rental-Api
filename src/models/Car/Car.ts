@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 
 export interface ICar {
     listedBy: mongoose.Types.ObjectId;
+    title: string;
     brand: string;
     model: string;
     year: number;
@@ -34,6 +35,7 @@ const carListingSchema = new mongoose.Schema<ICar>(
             required: true
         },
         // Car Info
+        title: { type: String, required: true },
         brand: { type: String, required: true },
         model: { type: String, required: true },
         year: { type: Number, required: true, min: 1990, max: new Date().getFullYear() + 1 },
@@ -100,7 +102,7 @@ const carListingSchema = new mongoose.Schema<ICar>(
         },
         status: {
             type: String,
-            enum: ['draft', 'published'],
+            enum: ['draft', 'active', 'inactive'],
             default: 'draft'
         },
         currentStep: {

@@ -9,6 +9,7 @@ type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 const stepFields: Record<Step, string[]> = {
     1: [
+        "title",
         "brand",
         "model",
         "year",
@@ -68,3 +69,24 @@ export const addCar = catchAsyncErrors(async (req: Request, res: Response, next:
 
     return ResponseHandler.send(res, `Step ${step} saved`, newCar, 200);
 });
+
+export const getList = catchAsyncErrors(async (req: Request, res: Response, next: NextFunction) => {
+    const { status } = req.query
+    const user = req.user as IUser
+
+    let query: { listedBy: IUser["_id"]; status?: string } = { listedBy: user._id };
+    if (status && status !== "all") {
+        query.status = status as string;
+    }
+
+    const list = await Car.find(query);
+    ResponseHandler.send(res, "Car List", list, 200)
+})
+
+export const getCarDetails = catchAsyncErrors(async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params
+    const user = req.user as IUser
+
+    const list = await Car.findOne({ _id: id, listedBy: user._id });
+    ResponseHandler.send(res, "Car List", list, 200)
+})
