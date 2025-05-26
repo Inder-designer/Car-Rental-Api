@@ -21,7 +21,7 @@ const stepFields: Record<Step, string[]> = {
         "description",
         "listingType"
     ],
-    2: ["images"],
+    2: ["images","thumbnail"],
     3: ["features", "description"],
     4: ["rentDetails", "saleDetails"],
     5: ["ownerInfo"],
@@ -55,7 +55,7 @@ export const addCar = catchAsyncErrors(async (req: Request, res: Response, next:
         updateData.status = step === 7 ? "published" : car.status !== "published" ? "draft" : car.status;
 
         const updatedCar = await Car.findByIdAndUpdate(listingId, { $set: updateData }, { new: true }).lean();
-        return ResponseHandler.send(res, `Step ${step} saved`, updatedCar, 200);
+        return ResponseHandler.send(res, `Step ${step} Updated`, updatedCar, 200);
     }
     if (step !== 1) return next(new ErrorHandler("Invalid initial step", 400));
 

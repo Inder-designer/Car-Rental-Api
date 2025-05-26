@@ -16,8 +16,8 @@ export interface ICar {
     images?: {
         public_id: string;
         url: string;
-        thumbnail?: boolean;
     }[];
+    thumbnail: string;
     features?: string[];
     description: string;
     rentDetails?: any;
@@ -56,9 +56,9 @@ const carListingSchema = new mongoose.Schema<ICar>(
             {
                 public_id: String,
                 url: String,
-                thumbnail: Boolean
             },
         ],
+        thumbnail: String,
 
         // Features
         features: { type: [String] },
