@@ -5,6 +5,9 @@ export interface ICar {
     title: string;
     brand: string;
     model: string;
+    Variant?: string;
+    color?: string;
+    carType?: "Hatchback" | "Sedan" | "SUV" | "Luxury" | "MUV" | "Convertible" | "Van";
     year: number;
     transmission?: string;
     fuelType?: string;
@@ -24,6 +27,7 @@ export interface ICar {
     saleDetails?: any;
     ownerInfo?: any;
     documents?: any;
+    views?: number;
     status: "draft" | "published";
     currentStep: number;
 }
@@ -37,6 +41,7 @@ const carListingSchema = new mongoose.Schema<ICar>(
         // Car Info
         title: { type: String, required: true },
         brand: { type: String, required: true },
+        Variant: String,
         model: { type: String, required: true },
         year: { type: Number, required: true, min: 1990, max: new Date().getFullYear() + 1 },
         transmission: { type: String, enum: ["manual", "automatic"] },
@@ -44,7 +49,11 @@ const carListingSchema = new mongoose.Schema<ICar>(
         seats: { type: Number, required: true, min: 1 },
         doors: { type: Number, required: true, min: 2 },
         category: { type: String, required: true },
-        totalRunning: Number,
+        carType: {
+            type: String,
+            enum: ['Hatchback', 'Sedan', 'SUV', 'Luxury', 'MUV', 'Convertible', 'Van'],
+        },
+        color: String,
         listingType: {
             type: String,
             enum: ["sell", "rent"],
@@ -83,9 +92,15 @@ const carListingSchema = new mongoose.Schema<ICar>(
 
         saleDetails: {
             price: Number,
-            isSold: Boolean,
             condition: { type: String, enum: ['new', 'used'] },
             owner: Number,
+            kmDriven: Number,
+            ownership: {
+                type: String,
+                enum: ['1st Owner', '2nd Owner', '3rd Owner', '4+ Owner'],
+            },
+            isSold: Boolean,
+            insuranceValidTill: Date,
         },
 
         // Owner Info
@@ -100,6 +115,7 @@ const carListingSchema = new mongoose.Schema<ICar>(
             carRegistration: String,
             insuranceDocument: String,
         },
+        views: { type: Number, default: 0 },
         status: {
             type: String,
             enum: ['draft', 'active', 'inactive'],

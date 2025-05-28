@@ -15,7 +15,35 @@ interface IUser extends Document {
     },
     role: string,
     isEmailVerified: boolean,
-    isNumberVerified: boolean
+    isNumberVerified: boolean,
+    address: {
+        address1?: string,
+        address2?: string,
+        city?: string,
+        state?: string,
+        country?: string,
+        postalCode?: string
+    },
+    licenseInfo: {
+        licenseNumber?: string,
+        licensePhoto?: {
+            url?: string,
+            publicId?: string
+        },
+        verified?: boolean
+    },
+    kycDocuments: {
+        panCardUrl?: string,
+        aadhaarUrl?: string,
+        bankAccount?: {
+            accountHolderName?: string,
+            accountNumber?: string,
+            ifscCode?: string,
+            bankName?: string
+        },
+        kycVerified?: boolean
+    },
+    isBlocked: boolean,
     generateToken(): string,
     generateResetToken(): string,
     comparePassword(password: string): Promise<boolean>,
@@ -55,7 +83,7 @@ const UserSchema = new mongoose.Schema<IUser>(
         },
         role: {
             type: String,
-            enum: ["admin", "customer"],
+            enum: ["admin", "customer", "partner"],
             default: "customer",
         },
         isEmailVerified: {
@@ -63,6 +91,37 @@ const UserSchema = new mongoose.Schema<IUser>(
             default: false,
         },
         isNumberVerified: {
+            type: Boolean,
+            default: false,
+        },
+        address: {
+            address1: String,
+            address2: String,
+            city: String,
+            state: String,
+            country: String,
+            postalCode: String,
+        },
+        licenseInfo: {
+            licenseNumber: String,
+            licensePhoto: {
+                url: String,
+                publicId: String,
+            }, // URL to uploaded image
+            verified: { type: Boolean, default: false },
+        },
+        kycDocuments: {
+            panCardUrl: String,
+            aadhaarUrl: String,
+            bankAccount: {
+                accountHolderName: String,
+                accountNumber: String,
+                ifscCode: String,
+                bankName: String,
+            },
+            kycVerified: { type: Boolean, default: false },
+        },
+        isBlocked: {
             type: Boolean,
             default: false,
         },
